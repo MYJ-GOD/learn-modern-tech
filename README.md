@@ -144,20 +144,22 @@ learn-modern-tech/
 │   ├── teaching-method/          # Evidence-based teaching methodology
 │   └── knowledge-graph/          # Per-course graph schema + build/query rules
 ├── .mcp.json                     # Context7 MCP Server (works everywhere)
-└── .gitignore                    # Runtime data lives in ~/.claude/learn/, not here
+└── .gitignore                    # .learn/ is runtime data, not part of the plugin
 ```
 
-Runtime data (created on first use, under `~/.claude/learn/`):
+Runtime data (created on first use, under `.learn/` in the project directory):
 
 ```
-~/.claude/learn/
+.learn/
 ├── memory/                       # Learning Memory (cross-course)
 └── courses/<tech>/
     ├── overview.md · roadmap.md · state.json
     ├── day-*.md · demo/          # Lessons + progressive project
-    ├── exam/                     # Cheat sheets (/learn review)
-    └── graph/                    # nodes.json · edges.json · index.json (/learn graph)
+    ├── exam/                     # Cheat sheets (review)
+    └── graph/                    # nodes.json · edges.json · index.json
 ```
+
+Add `.learn/` to your project's `.gitignore` if you don't want to commit learning data.
 
 ## Detailed Design
 
@@ -169,6 +171,5 @@ Runtime data (created on first use, under `~/.claude/learn/`):
 ## Data & Privacy
 
 All course content, progress state, and Learning Memory are stored locally under
-`$HOME/.claude/learn/` (Windows: `%USERPROFILE%\.claude\learn\`) — never inside the
-read-only plugin directory, and never sent anywhere except the doc/search queries
-you trigger.
+`.learn/` in the project directory — never inside the read-only plugin directory,
+and never sent anywhere except the doc/search queries you trigger.

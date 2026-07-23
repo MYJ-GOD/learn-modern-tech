@@ -18,7 +18,7 @@ retrieval scenarios:
 
 ## Storage Layout
 
-All under the **Data Root** (`$HOME/.claude/learn/`), never the plugin dir:
+All under the **Data Root** (`.learn/` in the project directory), never the plugin dir:
 
 ```
 courses/<tech>/graph/

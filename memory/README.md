@@ -1,10 +1,7 @@
 # Not the live memory store
 
-Live Learning Memory is stored under the **Data Root**, not here:
-
-```
-$HOME/.claude/learn/memory/     (Windows: %USERPROFILE%\.claude\learn\memory\)
-```
+Live Learning Memory is stored under the **Data Root** (`.learn/memory/` in the
+project directory), not here.
 
 The plugin install directory is read-only when installed from a marketplace, so
 nothing is written here at runtime. This folder only holds bundled seed/reference

@@ -8,24 +8,22 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, WebSearch, WebFetch, 
 
 ## Data Root (READ THIS FIRST)
 
-The plugin's own install directory is **read-only** when installed from a marketplace. NEVER write course, memory, or state files inside the plugin directory.
-
-All persistent data lives under the **Data Root**:
+All persistent data lives under the project directory:
 
 ```
-DATA_ROOT = $HOME/.claude/learn        (Windows: %USERPROFILE%\.claude\learn)
+DATA_ROOT = .learn/        (relative to project root)
 ```
 
 Resolve it at the start of every sub-command:
-- Bash: `LEARN_ROOT="${HOME:-$USERPROFILE}/.claude/learn"; mkdir -p "$LEARN_ROOT/courses" "$LEARN_ROOT/memory"`
+- Bash: `mkdir -p ".learn/courses" ".learn/memory"`
 
 Every relative path in this document resolves against `DATA_ROOT`:
 
 | Logical path | Real path |
 |--------------|-----------|
-| `courses/<tech>/` | `$DATA_ROOT/courses/<tech>/` |
-| `courses/.active` | `$DATA_ROOT/courses/.active` |
-| `memory/` | `$DATA_ROOT/memory/` |
+| `courses/<tech>/` | `.learn/courses/<tech>/` |
+| `courses/.active` | `.learn/courses/.active` |
+| `memory/` | `.learn/memory/` |
 
 The plugin directory itself is read only for reading bundled `agents/`, `skills/`, and templates.
 
@@ -92,11 +90,13 @@ AskUserQuestion:
     - label: "Deep mastery"
       description: "Deep mode, 14 days covering advanced features + source code"
     - label: "Interview prep"
-      description: "Focus on cheat sheets + common interview questions"
+      description: "5 days, focus on concepts + cheat sheets + common interview Q&A"
   multiSelect: false
 ```
 
-**Q2: How much time do you have?**
+★ If user selects "Interview prep" → set `mode: "interview"`, `total_days: 5`, and **skip Q2** (pace is fixed at 5 days). Go directly to Q3.
+
+**Q2: How much time do you have?** (skipped if Interview prep was selected)
 ```
 AskUserQuestion:
   question: "How much time do you plan to spend learning?"
@@ -151,8 +151,8 @@ Generate in `courses/<tech>/` directory:
 {
   "active_course": "<tech>",
   "current_day": 1,
-  "total_days": <based on granularity>,
-  "mode": "<speed|standard|deep|source>",
+  "total_days": <based on goal: speed=3, standard=7, deep=14, source=open, interview=5>,
+  "mode": "<speed|standard|deep|source|interview>",
   "last_demo_path": null,
   "completed_concepts": [],
   "known_concepts": []
@@ -180,13 +180,16 @@ already masters a concept that appears in this course's roadmap, pre-fill it her
 ### Step 0: Mandatory State Read
 
 1. Read `courses/.active` to determine current course (use parameter if tech specified)
+   - If `<tech>` is provided, also update `.active` to that tech (switch active course)
 2. Read `courses/<tech>/state.json`
 3. If it doesn't exist:
    - No courses at all → run the `status` welcome path (guide them to `/learn <tech>`)
    - Courses exist but not this one / no active → run `status` so they can pick one
    - A specific `<tech>` was named but not initialized → "No course for `<tech>` yet. Start it with `/learn <tech>`."
-4. If `current_day > total_days` → course is complete; suggest `/learn review <tech>` instead of teaching.
-5. Determine `current_day` and `mode`.
+4. If the course directory exists but `state.json` is malformed or missing required fields → inform the user and offer to reinitialize: "The course data for `<tech>` appears corrupted. Reinitialize it? (This will reset progress.)"
+5. If `.active` names a course whose directory is missing → warn and list what courses do exist.
+6. If `current_day > total_days` → course is complete; suggest `/learn review <tech>` instead of teaching.
+7. Determine `current_day` and `mode`.
 
 ### Step 0.5: Skip-check (avoid re-teaching known concepts)
 
@@ -225,7 +228,11 @@ Teacher agent executes:
    - **Standard mode**: Everything in Speed + deeper "why" + exercises with acceptance criteria
    - **Deep mode**: Everything in Standard + source code analysis + design patterns
    - **Source mode**: Call chain analysis + architecture diagram + design patterns
-3. Generate demo code (progressive, building on previous day)
+   - **Interview mode**: Definitions + contrasts + interview Q&A + comparison drills
+3. Generate demo code in `courses/<tech>/demo/` (progressive, building on previous day)
+   - Structure follows the technology's conventions (e.g., standard project scaffold)
+   - Each day's code must be runnable at that checkpoint (don't depend on future days)
+   - Update `last_demo_path` in state.json after generating
 4. ★ Iron rule: try to run the code first; if can't, provide verification checklist
 
 ### Step 2: Interactive Teaching
@@ -310,13 +317,9 @@ Goal: in ONE glance, answer "what am I learning, how far am I, what do I do next
 
 ### Step 1: Scan the Data Root
 
-```bash
-LEARN_ROOT="${HOME:-$USERPROFILE}/.claude/learn"
-```
-
-1. If `$LEARN_ROOT/courses/` doesn't exist or is empty → this is a first-time user. Show the **welcome path** (see below) instead of a dashboard.
-2. Read `$LEARN_ROOT/courses/.active` → the active course name (may be absent).
-3. For each `courses/<tech>/` directory, read its `state.json`.
+1. If `.learn/courses/` doesn't exist or is empty → this is a first-time user. Show the **welcome path** (see below) instead of a dashboard.
+2. Read `.learn/courses/.active` → the active course name (may be absent).
+3. For each `.learn/courses/<tech>/` directory, read its `state.json`.
 
 ### Step 2: Render the Dashboard
 
@@ -382,7 +385,7 @@ Print a concise, copy-pasteable reference. Follow the user's language.
   /learn help              This message
 
 Modes (chosen at init): ⚡ speed 3d · 📚 standard 7d · 🔬 deep 14d · 🔍 source
-Data is stored locally under ~/.claude/learn/ — nothing is uploaded.
+Data is stored locally under .learn/ (project directory) — nothing is uploaded.
 ```
 
 ---
@@ -426,7 +429,7 @@ Examples:
 
 ## Sub-command: recall (Adaptive Spaced Repetition — SM-2)
 
-Active-recall review session scheduled per-concept by SM-2. Full algorithm in
+Active-recall review session scheduled per-concept by SM-2. Full details in
 `skills/teaching-method/references/spaced-repetition.md` → "Adaptive Scheduling".
 
 1. Resolve `<tech>` (or `.active`). Ensure `graph/` exists; if not, suggest
@@ -435,13 +438,25 @@ Active-recall review session scheduled per-concept by SM-2. Full algorithm in
 3. **Select due concepts**: `due <= today`, plus any completed-day concept with no
    review entry yet (seed it). Exclude `known_concepts`. Order hardest/most-overdue first.
    - If nothing is due: tell the user, show the next due date, offer an early review anyway.
+   - **Seed values** for new concepts: `ease 2.5, interval 0, reps 0, due today`
 4. **Quiz** each due concept using **active recall** (not re-teaching):
    - Ask a question from the node's `interview_qa`, or "Explain X in your own words"
      (Feynman), or a fill-in-the-blank from its `code_refs`.
    - Let the user answer from memory, THEN reveal the expected answer.
-5. **Grade** the answer 0–5 (self-assessed, or inferred from the reply per the grade
-   mapping), apply the SM-2 update, and set the new `due`.
-6. Write back `graph/review.json`. Summarize: how many reviewed, how many passed,
+5. **Grade** the answer 0–5 (self-assessed, or inferred from the reply):
+   - **5** perfect, instant · **4** correct after slight hesitation · **3** correct but effortful
+   - **2** wrong but recognized on seeing answer · **1** wrong, familiar · **0** blank
+6. **Apply SM-2 update**:
+   ```
+   q < 3  (failed):  reps = 0;  interval = 1
+   q >= 3 (passed):  reps += 1
+                     interval = reps==1 ? 1
+                              : reps==2 ? 6
+                              : round(prev_interval * ease)
+   ease = max(1.3, ease + (0.1 - (5-q) * (0.08 + (5-q)*0.02)))
+   due  = today + interval days
+   ```
+7. Write back `graph/review.json`. Summarize: how many reviewed, how many passed,
    what's scheduled next, and which concepts are weak (low ease) and worth a
    `/learn find <concept>` refresher.
 
@@ -451,7 +466,7 @@ Keep it a session, not a lecture: one concept at a time, answer-first, brief.
 
 ## General Rules
 
-1. **Data Root**: Always resolve `DATA_ROOT = $HOME/.claude/learn` at the start of every sub-command (Windows: `$USERPROFILE\.claude\learn`), and `mkdir -p` the target directories before writing. NEVER write to the plugin install directory.
+1. **Data Root**: All data lives under `.learn/` in the project directory. Run `mkdir -p .learn/courses .learn/memory` at the start of every sub-command. NEVER write to the plugin install directory.
 2. **Language**: Follow the user's language (Chinese question → Chinese teaching, English → English)
 3. **Context7 fallback**: Context7 has results → use Context7; otherwise → WebSearch; neither → prompt user to provide docs URL
 4. **Progress visible**: Show current progress bar at the start of each continue

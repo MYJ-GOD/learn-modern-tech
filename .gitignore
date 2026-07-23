@@ -1,9 +1,5 @@
-# Runtime data — lives in $HOME/.claude/learn/, NOT here
-courses/
-data/graphs/
-
-# Personal memory seed (user-profile is runtime data, not part of the plugin)
-memory/user-profile.md
+# Runtime data — project-local .learn/ directory
+.learn/
 
 # OS
 .DS_Store

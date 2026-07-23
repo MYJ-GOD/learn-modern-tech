@@ -208,6 +208,37 @@ Post-course: Review at Day 17, 22, 29, 43, 70, 120
 - Design patterns → why it was designed this way
 - Architecture diagrams (Mermaid)
 
+### 🎯 Interview Prep Mode (5 days)
+
+**Bloom's levels**: 1-2 (Remember + Understand)
+**Cognitive load**: Moderate — breadth over depth
+**Daily structure**:
+```
+10 min: Cumulative active recall of all previous days
+20 min: New concepts (5-6 per day, focus on definitions + contrasts)
+15 min: Interview Q&A practice (from graph interview_qa)
+10 min: Concept comparison drills (A vs B, when to use which)
+5 min:  Update flashcards (Anki export at end of course)
+```
+
+**Content focus**:
+- Definitions and one-liners (not deep implementation)
+- Common interview questions (八股) per concept
+- Comparison tables (X vs Y, when to use which)
+- Pitfalls and gotchas (common trick questions)
+- Code snippets for fill-in-the-blank recall
+
+**Spaced review**:
+```
+Day 2 start: Active recall of Day 1 (10 min)
+Day 3 start: Active recall of Days 1-2 (10 min)
+Day 4 start: Active recall of Days 1-3 (10 min)
+Day 5: Full review + weak-area drilling (no new material)
+Post-course: Review at Day 7, 10, 15, 25
+```
+
+**Day 5 final**: Generate comprehensive cheat sheets + Anki export. No new material — pure review and weak-area drilling.
+
 ## Diagram Requirements
 
 | Situation | Diagram Type | Mermaid Keyword |

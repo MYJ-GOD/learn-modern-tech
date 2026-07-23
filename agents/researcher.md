@@ -82,4 +82,4 @@ Compress research results into the following format:
 - Do NOT output raw documentation. Only output compressed structure.
 - Keep concept list to 10-20 core concepts. Don't try to cover everything.
 - If the technology is too new or has little documentation, explicitly inform the main thread.
-- The returned overview will be written to `$HOME/.claude/learn/courses/<tech>/overview.md` (the **Data Root**, never the read-only plugin directory). If you write files yourself, resolve `$HOME` (Windows: `$USERPROFILE`) and `mkdir -p` the course directory first.
+- The returned overview will be written to `.learn/courses/<tech>/overview.md` (project-local Data Root). If you write files yourself, `mkdir -p` the course directory first.
