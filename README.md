@@ -56,7 +56,7 @@ in `.mcp.json`, confirm the tool names still match those referenced in
 | **Progressive Demo** | Build a complete runnable project by the end of the course |
 | **Code Trust** | Code is verified runnable; if not, a verification checklist is provided |
 | **Visual-first Teaching** | Diagrams, tables, and flowcharts before any code |
-| **Cheat Sheets** | Auto-generate structured review cards |
+| **Cheat Sheets** | Auto-generate structured review cards + Anki-importable `anki.csv` |
 | **Knowledge Graph** | Per-course concept map; query by concept, code location, or topic (八股) |
 
 ## Commands

@@ -261,14 +261,44 @@ After user confirms lesson complete:
 
 ## Sub-command: review (Generate Cheat Sheets)
 
-1. Read all `day-*.md` and `overview.md` under `courses/<tech>/`
+1. Read all `day-*.md` and `overview.md` under `courses/<tech>/`. If `graph/nodes.json`
+   exists, also read it — its `interview_qa`, `definition`, and `pitfalls` are the
+   best raw material for cards (already concept-anchored).
 2. Launch **teacher** agent to extract structured knowledge:
    - `exam/concepts.md`: Concept cheat sheets (Q&A format)
    - `exam/patterns.md`: Practical cheat sheets (code templates)
    - `exam/architecture.md`: Architecture cheat sheets (component relationship diagrams)
    - `exam/comparison.md`: Comparison cheat sheets (A vs B tables, if applicable)
 3. Grade by difficulty: Beginner / Intermediate / Advanced
-4. Update memory: Write "User completed <tech> course, mastery level: xxx"
+4. **Export Anki-importable flashcards** → `exam/anki.csv` (see below).
+5. Update memory: Write "User completed <tech> course, mastery level: xxx"
+
+### Anki CSV Export (`exam/anki.csv`)
+
+Anki natively imports CSV/TSV — no `.apkg` packaging needed. Generate a UTF-8 CSV
+with a header comment block Anki understands, then `front,back,tags` rows:
+
+```
+#separator:Comma
+#html:true
+#columns:Front,Back,Tags
+#tags column:3
+"What are React Server Components?","Components that render on the server and ship zero JS to the browser. Can't use hooks or event handlers.","nextjs rendering day2"
+"useState vs useReducer?","useState: simple local state. useReducer: complex state with multiple actions / transitions.","nextjs state day3"
+```
+
+Rules for good cards (from `references/spaced-repetition.md` → Flashcard Design):
+- **Question format**, one concept per card (not statements, not paragraphs).
+- Prefer cards sourced from graph `interview_qa`; supplement with fill-in-the-blank
+  code cards (`const [state, ____] = useState(0)` → `setState`).
+- Escape per CSV: wrap every field in double quotes; double any internal `"`.
+- Use HTML `<br>` for line breaks and `<code>…</code>` for inline code (header sets `#html:true`).
+- **Tags** column: space-separated, always include `<tech>` + the concept's day + tags.
+- Skip concepts in `known_concepts` (user already knew them — don't drill them).
+
+Tell the user how to import: **Anki → File → Import → select `anki.csv`**, field
+mapping is automatic from the header. Also mention the plain-Markdown cheat sheets
+in `exam/` for reading/printing.
 
 ---
 
