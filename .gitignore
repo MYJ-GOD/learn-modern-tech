@@ -1,0 +1,18 @@
+# Runtime data — lives in $HOME/.claude/learn/, NOT here
+courses/
+data/graphs/
+
+# Personal memory seed (user-profile is runtime data, not part of the plugin)
+memory/user-profile.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Node (if any tooling is added later)
+node_modules/

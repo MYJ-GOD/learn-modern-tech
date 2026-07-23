@@ -1,0 +1,11 @@
+{
+  "name": "learn-modern-tech",
+  "version": "0.1.0",
+  "description": "Universal learning workflow framework: Research → Collect Goals → Plan → Teach → Progressive Project → Review → Update. Learn any modern software technology.",
+  "author": {
+    "name": "MYJ-GOD"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/MYJ-GOD/learn-modern-tech",
+  "keywords": ["learning", "education", "claude-code", "plugin", "context7", "teaching"]
+}
