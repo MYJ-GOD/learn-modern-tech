@@ -61,3 +61,6 @@ For graph operations, read `skills/knowledge-graph/SKILL.md` for the schema and 
 6. **Don't re-teach known**: mastered = completed_concepts ∪ known_concepts + other courses' concepts from memory. Always name what's skipped.
 7. **Visual-first**: Every lesson needs at least 1 comparison table + 1 Mermaid diagram + annotated code
 8. **Active recall**: After each concept, ask the user to explain it back (Feynman check)
+9. **Weak concept feedback**: Before each lesson, check `graph/review.json` for concepts with low ease (< 2.0) or poor grades. Reinforce them in the next lesson as extra practice or woven examples.
+10. **Socratic discovery**: For the "WHY" step, use guided questions to help the user reason out the problem before revealing the solution. Switch to direct explanation if the concept is too simple or the user is stuck.
+11. **Spatial mnemonics**: For complex architectures (4+ components), use a familiar spatial analogy (restaurant, city, etc.) to make the architecture stick in memory.

@@ -117,6 +117,68 @@ GOOD: Group into 3 chunks:
       - UI chunk (components, hooks, state)
 ```
 
+### 11. Socratic Questioning (Guided Discovery)
+
+For the "WHY" step of the pipeline, use guided questions instead of direct explanation.
+This forces active reasoning and produces deeper understanding.
+
+**When to use**:
+- Teaching a concept that solves a real problem (not just "what is X")
+- The user has enough background to reason about the problem
+- The concept is non-trivial (worth the extra time)
+
+**When NOT to use**:
+- Simple concepts (variables, basic syntax) — just explain directly
+- The user is impatient or struggling — switch to direct explanation
+- After 2-3 questions the user is stuck — reveal the answer
+
+**Question patterns** (from `references/socratic.md`):
+1. **Clarification**: "What exactly do you mean by X?"
+2. **Hypothetical**: "What if we didn't have this? What would happen?"
+3. **Reasoning**: "What pattern do you observe here?"
+4. **Relationship**: "How does this connect to what you learned before?"
+5. **Consequence**: "If you write it this way, what happens under load?"
+
+### 12. Spatial Mnemonics (Method of Loci)
+
+For complex architectures (4+ components), use a familiar spatial environment as
+an analogy. This leverages the brain's powerful spatial memory system.
+
+**When to use**:
+- Teaching a new architecture for the first time
+- The system has 4+ interacting components
+- The user says "I keep forgetting what connects to what"
+
+**Example** (web application architecture):
+```
+Think of it like a restaurant:
+  - Browser = Customer (makes requests)
+  - CDN = Host (routes to the right table)
+  - Server = Kitchen (prepares the food)
+  - Database = Pantry (stores ingredients)
+  - Cache = Warming tray (keeps popular dishes ready)
+```
+
+**Rules**:
+- Use ONE consistent spatial analogy per architecture (don't mix metaphors)
+- Map every component to a spatial location
+- Reference the spatial analogy when explaining connections: "Remember, the
+  customer (browser) talks to the host (CDN), not directly to the kitchen (server)"
+
+### 13. Weak Concept Feedback Loop
+
+When recall sessions identify weak concepts (low ease or poor grades), those
+concepts should be reinforced in the next lesson automatically.
+
+**Flow**:
+1. `recall` identifies weak concepts → stored in `review.json` (ease < 2.0 or grade < 3)
+2. `continue` reads `review.json` before generating the lesson
+3. Teacher weaves weak concepts into the lesson as:
+   - Extra practice exercises (even from previous days)
+   - Examples when teaching new related concepts
+   - 5-10 min drilling at the start of the lesson
+4. This creates a self-correcting learning loop
+
 ## Mode-Specific Calibration
 
 ### ⚡ Speed Mode (3 days)

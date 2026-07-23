@@ -212,6 +212,21 @@ Then:
 Never silently skip: always name what's being skipped so the user can veto
 ("actually, re-teach that").
 
+### Step 0.7: Weak Concept Feedback (from recall data)
+
+Before launching the teacher, check `graph/review.json` for weak concepts:
+
+1. Read `graph/review.json` (empty if absent)
+2. Find concepts where `ease < 2.0` or `last_grade < 3` — these are **weak**
+3. If weak concepts exist:
+   - Tell the user: "From your last recall session, these concepts need extra practice: [list]"
+   - Pass the weak list to the teacher agent as **reinforcement targets**
+   - The teacher should: weave these into today's lesson as review examples, add
+     extra practice exercises for them, or dedicate 5-10 min at the start for drilling
+4. If no weak concepts → proceed normally
+
+This creates a feedback loop: recall identifies weaknesses → continue reinforces them.
+
 ### Step 1: Launch teacher agent
 
 Pass the following info to the **teacher** agent:
@@ -220,6 +235,7 @@ Pass the following info to the **teacher** agent:
 - overview.md and roadmap.md content (course plan)
 - Today is Day N
 - **Skip list**: concepts the user already knows → compress to a recall check, don't teach fresh
+- **Weak concepts**: concepts from recall with low ease or poor grades → reinforce in today's lesson
 
 Teacher agent executes:
 1. Fetch latest docs and code examples from Context7 for today's concepts
@@ -459,6 +475,10 @@ Active-recall review session scheduled per-concept by SM-2. Full details in
 7. Write back `graph/review.json`. Summarize: how many reviewed, how many passed,
    what's scheduled next, and which concepts are weak (low ease) and worth a
    `/learn find <concept>` refresher.
+8. **Flag weak concepts for feedback**: After the session, identify concepts with
+   `ease < 2.0` or `last_grade < 3`. These are automatically available to the
+   `continue` sub-command via `review.json` — no separate file needed. The continue
+   flow reads `review.json` and reinforces weak concepts in the next lesson.
 
 Keep it a session, not a lecture: one concept at a time, answer-first, brief.
 

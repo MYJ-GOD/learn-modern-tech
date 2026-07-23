@@ -37,11 +37,52 @@ Questions about previous material. User answers from memory.
 ### What is <Concept>?
 One sentence + analogy from known tech.
 
-### Why does it exist?
-What problem does it solve?
+### Why does it exist? (Socratic Discovery)
+Instead of directly stating the problem, use guided questions to help the user
+reason it out themselves (see `skills/teaching-method/references/socratic.md`):
+
+1. **Start from what they know**: "You've used X before. What's annoying about it?"
+2. **Build the gap**: "What if you needed to do Y? What would you need?"
+3. **Reveal the concept**: "That's exactly why <Concept> exists — it solves this by..."
+
+Example:
+```
+❌ Direct: "Server Components exist because client-side rendering is slow."
+✅ Socratic:
+  T: "When you use a regular React component, where does the JS run?"
+  U: "In the browser."
+  T: "Right. What if your component needs to fetch data from a database?"
+  U: "I'd need an API endpoint..."
+  T: "Exactly — you need a middleman. What if the component could just run on the server?"
+  U: "Oh, so no API needed?"
+  T: "That's Server Components. Now you see WHY they exist."
+```
+
+Switch to direct explanation if:
+- The concept is too simple for Socratic (e.g., "what is a variable")
+- The user seems impatient
+- After 2-3 questions the user is stuck
 
 ### How does it fit?
 Mermaid architecture diagram.
+
+### Spatial Mnemonic (for complex architectures)
+When teaching system architecture with 4+ components, use a **spatial analogy**
+from a familiar environment (Method of Loci — see `references/learning-science.md`):
+
+```
+Think of it like a restaurant:
+  - Browser = Customer (makes requests)
+  - CDN = Host (routes to the right table)
+  - Server = Kitchen (prepares the food)
+  - Database = Pantry (stores ingredients)
+  - Cache = Warming tray (keeps popular dishes ready)
+```
+
+This leverages spatial memory to make architecture stick. Use when:
+- Teaching a new architecture for the first time
+- The system has 4+ interacting components
+- The user says "I keep forgetting what connects to what"
 
 ### Key Pieces
 | Concept | What It Does | Analogy to Known Tech |
@@ -91,6 +132,30 @@ prior background, other courses, or explicit mid-course marking). For each:
 - Reallocate the freed lesson budget (chunks, time) to the genuinely new concepts.
 - Still use the known concept as an **analogy anchor** for new material where useful.
 - Name what you're skipping so the user can say "actually, re-teach that."
+
+## Weak Concepts (reinforcement targets)
+
+The main thread may pass a **weak concepts list** — concepts from recall sessions
+with low ease (< 2.0) or poor grades (< 3). These need extra reinforcement:
+
+- **Weave into today's lesson**: Use weak concepts as examples when teaching new
+  material. "Remember X? Here's how it connects to today's topic."
+- **Extra practice**: Add 1-2 targeted exercises for weak concepts in the practice
+  section, even if they're from previous days.
+- **Spaced recall drill**: At the start of the lesson, spend 5-10 min drilling
+  weak concepts before moving to new material.
+- **Don't re-teach from scratch**: The user has seen it before. Focus on
+  *application* and *connection*, not re-explanation.
+
+Example reinforcement flow:
+```
+Weak concept: "useEffect cleanup"
+→ During new lesson on data fetching:
+  "Quick drill — when you fetch data in useEffect, what happens if the component
+   unmounts before the fetch completes? How do you handle that?"
+→ If user struggles: brief re-explanation with new analogy
+→ If user gets it: "Nice, that clicked. Let's see it in today's code."
+```
 
 ## Dialogue Rules
 
