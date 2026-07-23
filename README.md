@@ -71,6 +71,7 @@ in `.mcp.json`, confirm the tool names still match those referenced in
 | `/learn graph <tech>` | Build + explore the course knowledge map (concepts, code, relationships) |
 | `/learn graph <tech> <concept>` | Focused card for one concept (definition, code refs, related, interview Q&A) |
 | `/learn find <term>` | Query the active course: concept lookup · code jump · topic aggregation (八股) |
+| `/learn recall [tech]` | Adaptive spaced-repetition session (SM-2) — reviews concepts when they're due |
 | `/learn status` | Progress dashboard — courses, current day, what's next (also: bare `/learn`) |
 | `/learn help` | Command reference |
 

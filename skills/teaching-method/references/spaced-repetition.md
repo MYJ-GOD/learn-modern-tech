@@ -111,6 +111,49 @@ Post-course:
   Day 17, 22, 29, 43, 70, 120
 ```
 
+## Adaptive Scheduling (SM-2) — executable spec
+
+The fixed schedules above are the **default/fallback**. When a course has a
+knowledge graph, the framework tracks per-concept review state and schedules
+each concept adaptively with SM-2, so easy concepts stretch out and hard ones
+come back sooner (instead of one static calendar for everything).
+
+### Per-concept state (stored in `courses/<tech>/graph/review.json`)
+
+```json
+{
+  "server-components": { "ease": 2.5, "interval": 6, "reps": 2, "due": "2026-08-01", "last_grade": 4 },
+  "usestate":          { "ease": 2.36, "interval": 1, "reps": 1, "due": "2026-07-25", "last_grade": 3 }
+}
+```
+
+Keyed by graph node `id`. A concept enters this table the first time it's
+recalled (seed: `ease 2.5, interval 0, reps 0, due today`).
+
+### SM-2 update (grade `q` = 0–5, given after each recall)
+
+```
+q < 3  (failed):  reps = 0;  interval = 1
+q >= 3 (passed):  reps += 1
+                  interval = reps==1 ? 1
+                           : reps==2 ? 6
+                           : round(prev_interval * ease)
+ease = max(1.3, ease + (0.1 - (5-q) * (0.08 + (5-q)*0.02)))
+due  = today + interval days
+```
+
+Grade mapping for recall answers (self-assessed or judged from the user's reply):
+- **5** perfect, instant · **4** correct after slight hesitation · **3** correct but effortful
+- **2** wrong but recognized on seeing answer · **1** wrong, familiar · **0** blank
+
+### Selecting what to review
+
+A concept is **due** when `due <= today`. `/learn recall` pulls all due concepts
+(hardest/most-overdue first), quizzes them, applies the SM-2 update, writes back
+`review.json`. New (never-recalled) concepts from completed days are always due.
+
+Skip concepts in `known_concepts` — the user never needed to learn them.
+
 ## Flashcard Design Rules
 
 ### DO

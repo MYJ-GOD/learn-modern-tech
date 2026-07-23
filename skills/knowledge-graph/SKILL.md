@@ -24,8 +24,13 @@ All under the **Data Root** (`$HOME/.claude/learn/`), never the plugin dir:
 courses/<tech>/graph/
 ├── nodes.json    # concepts + definitions + anchors
 ├── edges.json    # typed relationships between concepts
-└── index.json    # fast lookup: name/alias → id, tag → ids, code → id
+├── index.json    # fast lookup: name/alias → id, tag → ids, code → id
+└── review.json   # per-concept SM-2 state for /learn recall (ease/interval/due)
 ```
+
+`review.json` is owned by `/learn recall` (schema + algorithm in
+`skills/teaching-method/references/spaced-repetition.md`). The graph build steps
+below never touch it.
 
 The graph is built incrementally: each `/learn continue` appends the day's new
 nodes/edges/index entries. A manual `/learn graph <tech>` can rebuild from all

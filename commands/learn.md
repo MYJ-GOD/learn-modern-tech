@@ -1,6 +1,6 @@
 ---
-description: Learn any modern software technology. Usage: /learn <tech> (init) | continue | review | graph | find | status | help
-argument-hint: <tech> | continue [tech] | review [tech] | graph <tech> [concept] | find <term> | status | help
+description: Learn any modern software technology. Usage: /learn <tech> (init) | continue | review | recall | graph | find | status | help
+argument-hint: <tech> | continue [tech] | review [tech] | recall [tech] | graph <tech> [concept] | find <term> | status | help
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, WebSearch, WebFetch, AskUserQuestion, mcp__context7__resolve_library_id, mcp__context7__query_docs
 ---
 
@@ -48,8 +48,10 @@ Parse sub-commands as follows:
 | `/learn graph <tech>` | graph | Build/rebuild + show the course knowledge graph |
 | `/learn graph <tech> <concept>` | graph | Show a focused card for one concept |
 | `/learn find <term>` | find | Query the active course's graph (concept / code / tag / 八股) |
+| `/learn recall` | recall | Adaptive spaced-repetition session (SM-2) for due concepts |
+| `/learn recall <tech>` | recall | Recall session for a specific course |
 
-**Reserved keywords**: `status`, `help`, `continue`, `review`, `graph`, `find` are sub-commands. If a user genuinely wants to learn a technology literally named one of these, they can't collide in practice — treat a bare reserved word as its sub-command. Any other single token is treated as `<tech>` for `init`.
+**Reserved keywords**: `status`, `help`, `continue`, `review`, `graph`, `find`, `recall` are sub-commands. If a user genuinely wants to learn a technology literally named one of these, they can't collide in practice — treat a bare reserved word as its sub-command. Any other single token is treated as `<tech>` for `init`.
 
 **Ambiguity guard**: Before `init` on a `<tech>`, check `$DATA_ROOT/courses/<tech>/state.json`. If it already exists, do NOT re-initialize — inform the user the course exists and route to `continue` (or ask if they want to restart).
 
@@ -255,7 +257,7 @@ After user confirms lesson complete:
 3. Update `memory/`: record mastery so **other courses** can skip it later. Write
    the concept names (not just "Day N done") — e.g. "Mastered: hooks, JSX, components
    (via <tech>, Day N)". Skipped-known concepts count as mastered in memory too.
-4. If `current_day > total_days`, prompt: "Course complete! Run `/learn review` for cheat sheets, or `/learn graph <tech>` to explore the knowledge map."
+4. If `current_day > total_days`, prompt: "Course complete! Run `/learn review` for cheat sheets, `/learn recall` to start spaced-repetition review, or `/learn graph <tech>` to explore the knowledge map."
 
 ---
 
@@ -370,8 +372,9 @@ Print a concise, copy-pasteable reference. Follow the user's language.
                            e.g. /learn nextjs · /learn rust · /learn fastapi
   /learn continue          Teach today's lesson of the active course
   /learn continue <tech>   Switch to another course and continue
-  /learn review            Generate cheat sheets for the active course
+  /learn review            Generate cheat sheets (+ Anki anki.csv) for the active course
   /learn review <tech>     Cheat sheets for a specific course
+  /learn recall [tech]     Adaptive spaced-repetition session (SM-2) for due concepts
   /learn graph <tech>      Build + show the course knowledge map
   /learn graph <tech> <c>  Focused card for one concept
   /learn find <term>       Query active course: concept · code · topic (八股)
@@ -420,6 +423,29 @@ Examples:
 - `/learn find server components` → concept card
 - `/learn find middleware.ts` → "route-protection (Day 3), demo/middleware.ts:12"
 - `/learn find state management` → aggregated 八股 sheet across useState/useReducer/Context
+
+## Sub-command: recall (Adaptive Spaced Repetition — SM-2)
+
+Active-recall review session scheduled per-concept by SM-2. Full algorithm in
+`skills/teaching-method/references/spaced-repetition.md` → "Adaptive Scheduling".
+
+1. Resolve `<tech>` (or `.active`). Ensure `graph/` exists; if not, suggest
+   `/learn continue` first (nothing to recall yet).
+2. Read `graph/review.json` (empty if absent) and `graph/nodes.json`.
+3. **Select due concepts**: `due <= today`, plus any completed-day concept with no
+   review entry yet (seed it). Exclude `known_concepts`. Order hardest/most-overdue first.
+   - If nothing is due: tell the user, show the next due date, offer an early review anyway.
+4. **Quiz** each due concept using **active recall** (not re-teaching):
+   - Ask a question from the node's `interview_qa`, or "Explain X in your own words"
+     (Feynman), or a fill-in-the-blank from its `code_refs`.
+   - Let the user answer from memory, THEN reveal the expected answer.
+5. **Grade** the answer 0–5 (self-assessed, or inferred from the reply per the grade
+   mapping), apply the SM-2 update, and set the new `due`.
+6. Write back `graph/review.json`. Summarize: how many reviewed, how many passed,
+   what's scheduled next, and which concepts are weak (low ease) and worth a
+   `/learn find <concept>` refresher.
+
+Keep it a session, not a lecture: one concept at a time, answer-first, brief.
 
 ---
 
