@@ -16,7 +16,7 @@ Inside Claude Code, add this repo as a marketplace, then install the plugin:
 (`learn-modern-tech@learn-modern-tech` = plugin name @ marketplace name — both
 happen to match here since this repo is a single-plugin marketplace.)
 
-### Option B — local development
+### Option B — local development (CLI)
 
 Clone the repo and point Claude Code at the directory:
 
@@ -25,18 +25,51 @@ git clone https://github.com/MYJ-GOD/learn-modern-tech.git
 claude --plugin-dir ./learn-modern-tech
 ```
 
+### Option C — VSCode / Claude Desktop (via CLAUDE.md)
+
+This project also works without the plugin system, using `CLAUDE.md` + `.mcp.json`
+which are read by the Claude Code VSCode extension, Claude Desktop, and claude.ai.
+
+**Setup** — copy these two files into the project you want to learn:
+
+```bash
+# From this repo, copy into your target project:
+cp CLAUDE.md /path/to/your/project/
+cp .mcp.json /path/to/your/project/
+```
+
+Then open that project in VSCode with the Claude Code extension, and just type
+natural language commands:
+
+| Instead of | Say |
+|------------|-----|
+| `/learn nextjs` | "learn nextjs" |
+| `/learn continue` | "continue" or "继续" |
+| `/learn review` | "review" or "复习" |
+| `/learn recall` | "recall" or "quiz" |
+| `/learn status` | "status" or "进度" |
+| `/learn help` | "help" or "帮助" |
+
+**VSCode terminal** — alternatively, run CLI directly in VSCode's integrated terminal
+for the full plugin experience with slash commands:
+
+```bash
+claude --plugin-dir /path/to/learn-modern-tech
+```
+
+This gives you the file explorer on the left + full plugin commands.
+
 ### Verify
 
-```
-/learn help
-```
+**CLI plugin**: `/learn help` — if you see the command list, it's loaded.
+**CLAUDE.md mode**: say "learn help" — same result.
 
-If you see the command list, it's loaded. First use auto-starts the Context7 MCP
-server (downloads `@upstash/context7-mcp@3.2.4` via `npx` — needs Node 18+).
+First use auto-starts the Context7 MCP server (downloads `@upstash/context7-mcp@3.2.4`
+via `npx` — needs Node 18+).
 
 ### Prerequisites
 
-- Claude Code CLI installed
+- Claude Code CLI **or** VSCode with Claude Code extension
 - Node.js 18+ (for Context7 MCP Server)
 
 The Context7 MCP server is pinned to a specific version in `.mcp.json`
@@ -101,15 +134,16 @@ in `.mcp.json`, confirm the tool names still match those referenced in
 
 ```
 learn-modern-tech/
-├── .claude-plugin/plugin.json    # Plugin metadata
-├── commands/learn.md             # /learn entry command
+├── CLAUDE.md                     # Universal entry point (VSCode, Desktop, claude.ai)
+├── .claude-plugin/plugin.json    # Plugin metadata (CLI only)
+├── commands/learn.md             # /learn entry command (CLI plugin only)
 ├── agents/
 │   ├── researcher.md             # Research agent (context isolation)
 │   └── teacher.md                # Teaching agent (visual-first methodology)
 ├── skills/
 │   ├── teaching-method/          # Evidence-based teaching methodology
 │   └── knowledge-graph/          # Per-course graph schema + build/query rules
-├── .mcp.json                     # Context7 MCP Server
+├── .mcp.json                     # Context7 MCP Server (works everywhere)
 └── .gitignore                    # Runtime data lives in ~/.claude/learn/, not here
 ```
 
