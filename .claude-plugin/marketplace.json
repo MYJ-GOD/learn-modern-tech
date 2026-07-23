@@ -1,0 +1,22 @@
+{
+  "name": "learn-modern-tech",
+  "owner": {
+    "name": "MYJ-GOD",
+    "url": "https://github.com/MYJ-GOD"
+  },
+  "metadata": {
+    "description": "Marketplace for the Learn Modern Tech learning-workflow plugin.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "learn-modern-tech",
+      "source": "./",
+      "description": "Universal learning workflow: Research → Collect Goals → Plan → Teach → Progressive Project → Review. Learn any modern software technology, always against the latest docs.",
+      "author": { "name": "MYJ-GOD" },
+      "homepage": "https://github.com/MYJ-GOD/learn-modern-tech",
+      "license": "MIT",
+      "keywords": ["learning", "education", "claude-code", "context7", "teaching", "spaced-repetition"]
+    }
+  ]
+}

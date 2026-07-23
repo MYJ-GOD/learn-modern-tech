@@ -4,13 +4,35 @@
 
 ## Install
 
-```bash
-# Local development
-claude --plugin-dir ./learn-modern-tech
+### Option A — via marketplace (recommended)
 
-# From Marketplace (after publishing)
-/plugin install learn-modern-tech@claude-code-marketplace
+Inside Claude Code, add this repo as a marketplace, then install the plugin:
+
 ```
+/plugin marketplace add MYJ-GOD/learn-modern-tech
+/plugin install learn-modern-tech@learn-modern-tech
+```
+
+(`learn-modern-tech@learn-modern-tech` = plugin name @ marketplace name — both
+happen to match here since this repo is a single-plugin marketplace.)
+
+### Option B — local development
+
+Clone the repo and point Claude Code at the directory:
+
+```bash
+git clone https://github.com/MYJ-GOD/learn-modern-tech.git
+claude --plugin-dir ./learn-modern-tech
+```
+
+### Verify
+
+```
+/learn help
+```
+
+If you see the command list, it's loaded. First use auto-starts the Context7 MCP
+server (downloads `@upstash/context7-mcp@3.2.4` via `npx` — needs Node 18+).
 
 ### Prerequisites
 
