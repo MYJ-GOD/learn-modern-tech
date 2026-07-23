@@ -17,6 +17,13 @@ claude --plugin-dir ./learn-modern-tech
 - Claude Code CLI installed
 - Node.js 18+ (for Context7 MCP Server)
 
+The Context7 MCP server is pinned to a specific version in `.mcp.json`
+(`@upstash/context7-mcp@3.2.4`) rather than `@latest`, so the MCP tool names the
+plugin calls (`mcp__context7__resolve_library_id`, `mcp__context7__query_docs`)
+can't drift out from under it on an upstream update. To upgrade: bump the version
+in `.mcp.json`, confirm the tool names still match those referenced in
+`commands/learn.md` and `agents/*.md`, then commit.
+
 ## Usage
 
 ```bash
