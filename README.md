@@ -32,8 +32,11 @@ claude --plugin-dir ./learn-modern-tech
 # Generate review cards (cheat sheets)
 /learn review
 
-# Build knowledge graph for a completed course (P2+)
-/learn graph nextjs
+# See your progress dashboard (or just run /learn)
+/learn status
+
+# Command reference
+/learn help
 ```
 
 ## Core Features
@@ -57,7 +60,9 @@ claude --plugin-dir ./learn-modern-tech
 | `/learn continue <tech>` | Switch to a specific course and continue |
 | `/learn review` | Generate cheat sheets for the current course |
 | `/learn review <tech>` | Generate cheat sheets for a specific course |
-| `/learn graph <tech>` | Build knowledge graph for a completed course (P2+) |
+| `/learn status` | Progress dashboard — courses, current day, what's next (also: bare `/learn`) |
+| `/learn help` | Command reference |
+| `/learn graph <tech>` | 🚧 Cross-course knowledge graph — planned, not yet available |
 
 ## Architecture
 
