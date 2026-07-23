@@ -1,6 +1,6 @@
 ---
-description: Learn any modern software technology. Usage: /learn <tech> (init) | continue | review | status | help
-argument-hint: <tech> | continue [tech] | review [tech] | status | help
+description: Learn any modern software technology. Usage: /learn <tech> (init) | continue | review | graph | find | status | help
+argument-hint: <tech> | continue [tech] | review [tech] | graph <tech> [concept] | find <term> | status | help
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, WebSearch, WebFetch, AskUserQuestion, mcp__context7__resolve_library_id, mcp__context7__query_docs
 ---
 
@@ -45,8 +45,11 @@ Parse sub-commands as follows:
 | `/learn continue <tech>` | continue | Switch to specified course and continue |
 | `/learn review` | review | Generate cheat sheets |
 | `/learn review <tech>` | review | Generate cheat sheets for specified course |
+| `/learn graph <tech>` | graph | Build/rebuild + show the course knowledge graph |
+| `/learn graph <tech> <concept>` | graph | Show a focused card for one concept |
+| `/learn find <term>` | find | Query the active course's graph (concept / code / tag / 八股) |
 
-**Reserved keywords**: `status`, `help`, `continue`, `review` are sub-commands. If a user genuinely wants to learn a technology literally named one of these, they can't collide in practice — treat a bare reserved word as its sub-command. Any other single token is treated as `<tech>` for `init`.
+**Reserved keywords**: `status`, `help`, `continue`, `review`, `graph`, `find` are sub-commands. If a user genuinely wants to learn a technology literally named one of these, they can't collide in practice — treat a bare reserved word as its sub-command. Any other single token is treated as `<tech>` for `init`.
 
 **Ambiguity guard**: Before `init` on a `<tech>`, check `$DATA_ROOT/courses/<tech>/state.json`. If it already exists, do NOT re-initialize — inform the user the course exists and route to `continue` (or ask if they want to restart).
 
@@ -203,9 +206,14 @@ After teacher outputs the lesson, enter dialogue mode:
 ### Step 3: Update State After Completion
 
 After user confirms lesson complete:
-1. Update `state.json`: `current_day++`, append `completed_concepts`, update `last_demo_path`
-2. Update `memory/`: Write "Mastered <concept list>"
-3. If `current_day > total_days`, prompt: "Course complete! Run `/learn review` to generate cheat sheets."
+1. **Update the knowledge graph** (incremental): follow the **Knowledge Graph** skill
+   (`skills/knowledge-graph/SKILL.md`) → "Building / Updating". Extract today's new
+   concepts → nodes (with real `code_refs` from the demo you just built), link edges
+   to prior concepts, rebuild `index.json`. If extraction isn't clean, skip rather
+   than write garbage — a later `/learn graph` rebuild recovers it.
+2. Update `state.json`: `current_day++`, append `completed_concepts`, update `last_demo_path`
+3. Update `memory/`: Write "Mastered <concept list>"
+4. If `current_day > total_days`, prompt: "Course complete! Run `/learn review` for cheat sheets, or `/learn graph <tech>` to explore the knowledge map."
 
 ---
 
@@ -291,21 +299,54 @@ Print a concise, copy-pasteable reference. Follow the user's language.
   /learn continue <tech>   Switch to another course and continue
   /learn review            Generate cheat sheets for the active course
   /learn review <tech>     Cheat sheets for a specific course
+  /learn graph <tech>      Build + show the course knowledge map
+  /learn graph <tech> <c>  Focused card for one concept
+  /learn find <term>       Query active course: concept · code · topic (八股)
   /learn status            Show progress dashboard (also: bare /learn)
   /learn help              This message
 
 Modes (chosen at init): ⚡ speed 3d · 📚 standard 7d · 🔬 deep 14d · 🔍 source
 Data is stored locally under ~/.claude/learn/ — nothing is uploaded.
-Roadmap: /learn graph <tech> (cross-course knowledge graph) — not yet available.
 ```
 
 ---
 
-## Sub-command: graph (Roadmap — Not Implemented Yet)
+## Sub-command: graph (Knowledge Graph — Build & Explore)
 
-Post-learning knowledge graph construction across completed courses. Planned for a
-future release. If invoked today, tell the user it is not yet available and suggest
-`/learn review` for consolidation instead.
+Per-course knowledge graph: concepts linked by relationships, anchored to lessons
+and demo code. Full details in the **Knowledge Graph** skill (`skills/knowledge-graph/SKILL.md`).
+
+### `/learn graph <tech>` (no concept term)
+
+1. Resolve `<tech>` (or `.active` if omitted). If no such course → route to `status`.
+2. If `courses/<tech>/graph/` is missing or older than the newest `day-*.md`,
+   **rebuild** it from all `day-*.md` + demo (skill → "Manual Build / Rebuild").
+3. Render the **full graph view**: a Mermaid `flowchart LR` PLUS a compact
+   day-grouped text outline (terminals don't render Mermaid — always include text).
+
+### `/learn graph <tech> <concept>`
+
+Resolve the concept via `index.json` and print the **focused concept card**
+(definition, analogy, lesson anchor, code refs, related edges, pitfalls, interview Q&A).
+If unmatched, list the closest 3-5 concept labels.
+
+## Sub-command: find (Query the Active Course Graph)
+
+Shortcut for querying without naming the tech — uses `.active`.
+
+1. Read `.active`; if none → `status`. Ensure its `graph/` exists (build if missing).
+2. Resolve `<term>` in order: concept name/alias → tag → code path/symbol → fuzzy.
+3. Dispatch by match type (skill → "Querying"):
+   - **Concept** → focused concept card (same as `graph <tech> <concept>`)
+   - **Code path/symbol** → the concept(s) that own it + their `code_refs` (code-jump)
+   - **Tag / topic phrase** → **interview aggregation (八股)**: all nodes under the
+     tag as one study sheet with contrasts + merged Q&A
+4. No match → say so, suggest `/learn graph <tech>` for the full map.
+
+Examples:
+- `/learn find server components` → concept card
+- `/learn find middleware.ts` → "route-protection (Day 3), demo/middleware.ts:12"
+- `/learn find state management` → aggregated 八股 sheet across useState/useReducer/Context
 
 ---
 

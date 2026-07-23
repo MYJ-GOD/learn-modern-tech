@@ -50,6 +50,7 @@ claude --plugin-dir ./learn-modern-tech
 | **Code Trust** | Code is verified runnable; if not, a verification checklist is provided |
 | **Visual-first Teaching** | Diagrams, tables, and flowcharts before any code |
 | **Cheat Sheets** | Auto-generate structured review cards |
+| **Knowledge Graph** | Per-course concept map; query by concept, code location, or topic (八股) |
 
 ## Commands
 
@@ -60,9 +61,11 @@ claude --plugin-dir ./learn-modern-tech
 | `/learn continue <tech>` | Switch to a specific course and continue |
 | `/learn review` | Generate cheat sheets for the current course |
 | `/learn review <tech>` | Generate cheat sheets for a specific course |
+| `/learn graph <tech>` | Build + explore the course knowledge map (concepts, code, relationships) |
+| `/learn graph <tech> <concept>` | Focused card for one concept (definition, code refs, related, interview Q&A) |
+| `/learn find <term>` | Query the active course: concept lookup · code jump · topic aggregation (八股) |
 | `/learn status` | Progress dashboard — courses, current day, what's next (also: bare `/learn`) |
 | `/learn help` | Command reference |
-| `/learn graph <tech>` | 🚧 Cross-course knowledge graph — planned, not yet available |
 
 ## Architecture
 
@@ -73,11 +76,23 @@ learn-modern-tech/
 ├── agents/
 │   ├── researcher.md             # Research agent (context isolation)
 │   └── teacher.md                # Teaching agent (visual-first methodology)
-├── skills/teaching-method/       # Teaching methodology
+├── skills/
+│   ├── teaching-method/          # Evidence-based teaching methodology
+│   └── knowledge-graph/          # Per-course graph schema + build/query rules
 ├── .mcp.json                     # Context7 MCP Server
-├── memory/                       # Learning Memory
-├── courses/                      # Course outputs
-└── data/graphs/                  # Knowledge graphs (P2+)
+└── .gitignore                    # Runtime data lives in ~/.claude/learn/, not here
+```
+
+Runtime data (created on first use, under `~/.claude/learn/`):
+
+```
+~/.claude/learn/
+├── memory/                       # Learning Memory (cross-course)
+└── courses/<tech>/
+    ├── overview.md · roadmap.md · state.json
+    ├── day-*.md · demo/          # Lessons + progressive project
+    ├── exam/                     # Cheat sheets (/learn review)
+    └── graph/                    # nodes.json · edges.json · index.json (/learn graph)
 ```
 
 ## Detailed Design
@@ -85,6 +100,7 @@ learn-modern-tech/
 - Command flow & sub-commands: [`commands/learn.md`](commands/learn.md)
 - Research methodology: [`agents/researcher.md`](agents/researcher.md)
 - Teaching methodology (evidence base): [`skills/teaching-method/SKILL.md`](skills/teaching-method/SKILL.md) and its `references/`
+- Knowledge graph schema & queries: [`skills/knowledge-graph/SKILL.md`](skills/knowledge-graph/SKILL.md)
 
 ## Data & Privacy
 
