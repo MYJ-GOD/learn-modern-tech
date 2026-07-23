@@ -193,10 +193,23 @@ Close the lesson. Answer from memory:
 ## 🛠️ Run Verification Checklist (if needed)
 ```
 
+## Skip List (known concepts)
+
+The main thread may pass a **skip list** — concepts the user already knows (from
+prior background, other courses, or explicit mid-course marking). For each:
+
+- Do NOT teach it fresh. Replace the full Explain→Build treatment with a **one-line
+  recall check**: "You already know X — quick check: <one question>." Move on unless
+  the user stumbles.
+- Reallocate the freed lesson budget (chunks, time) to the genuinely new concepts.
+- Still use the known concept as an **analogy anchor** for new material where useful.
+- Name what you're skipping so the user can say "actually, re-teach that."
+
 ## Dialogue Rules
 
 - "I don't get it" → Switch analogy, switch angle, re-explain
-- "Too easy" → Skip or go deeper (increase Bloom's level)
+- "Too easy" / "I already know this" / "skip X" → confirm the concept, treat it as
+  known (recall check only), and report it back so the main thread records it in `known_concepts`
 - "How does A relate to B?" → Use known knowledge as analogy
 - Beyond current scope → Brief answer, suggest covering later
 

@@ -152,9 +152,18 @@ Generate in `courses/<tech>/` directory:
   "total_days": <based on granularity>,
   "mode": "<speed|standard|deep|source>",
   "last_demo_path": null,
-  "completed_concepts": []
+  "completed_concepts": [],
+  "known_concepts": []
 }
 ```
+
+- `completed_concepts`: concepts **taught in this course** and confirmed done.
+- `known_concepts`: concepts the user **already knew and skipped** (from prior
+  background or marked mid-course). Both count as "mastered" for skip decisions,
+  but are tracked separately so `review`/`graph` know what was actually taught here.
+
+At init, seed `known_concepts` from Learning Memory: if memory records the user
+already masters a concept that appears in this course's roadmap, pre-fill it here.
 
 **`courses/.active`**: Write current active course name
 
@@ -177,13 +186,35 @@ Generate in `courses/<tech>/` directory:
 4. If `current_day > total_days` → course is complete; suggest `/learn review <tech>` instead of teaching.
 5. Determine `current_day` and `mode`.
 
+### Step 0.5: Skip-check (avoid re-teaching known concepts)
+
+Before launching the teacher, compute what Day N *would* cover (from `roadmap.md`)
+and cross-check against **already-mastered** concepts:
+
+- `mastered = completed_concepts ∪ known_concepts` (from state.json)
+- Also consult Learning Memory for concepts mastered in **other courses**
+  (e.g. learned `hooks` in a React course → skip it in a Next.js course).
+
+Then:
+1. **All of Day N is already known** → don't re-teach. Tell the user briefly what
+   they already know, mark those into `known_concepts`, advance `current_day`, and
+   offer: "Skip to Day N+1?" or "Quick recall check instead?" Do NOT generate a full lesson.
+2. **Part of Day N is known** → pass the known subset to the teacher so it
+   *compresses* those into a one-line recall ("You already know X — quick check:
+   …") and spends the lesson budget on the genuinely new concepts.
+3. **Nothing known** → proceed normally.
+
+Never silently skip: always name what's being skipped so the user can veto
+("actually, re-teach that").
+
 ### Step 1: Launch teacher agent
 
 Pass the following info to the **teacher** agent:
-- state.json content (current progress)
-- Learning Memory content (user background)
+- state.json content (current progress) — including `completed_concepts` + `known_concepts`
+- Learning Memory content (user background + concepts mastered in other courses)
 - overview.md and roadmap.md content (course plan)
 - Today is Day N
+- **Skip list**: concepts the user already knows → compress to a recall check, don't teach fresh
 
 Teacher agent executes:
 1. Fetch latest docs and code examples from Context7 for today's concepts
@@ -200,8 +231,13 @@ Teacher agent executes:
 After teacher outputs the lesson, enter dialogue mode:
 - Wait for user feedback
 - "I don't get it" → Switch analogy/angle/method to re-explain
-- "Too easy" → Skip or go deeper
+- "Too easy" / "I already know this" / "skip X" → confirm which concept(s), then
+  **mark them into `known_concepts`** (Step 3 will persist), stop teaching those,
+  and move on. If it's a whole-topic skip, jump ahead; if partial, continue with the rest.
 - "How does X relate to Y?" → Use known knowledge as analogy
+
+**Skip is a first-class action, not just "go faster."** When the user marks a
+concept known, it must be recorded so future days and future courses respect it.
 
 ### Step 3: Update State After Completion
 
@@ -211,8 +247,14 @@ After user confirms lesson complete:
    concepts → nodes (with real `code_refs` from the demo you just built), link edges
    to prior concepts, rebuild `index.json`. If extraction isn't clean, skip rather
    than write garbage — a later `/learn graph` rebuild recovers it.
-2. Update `state.json`: `current_day++`, append `completed_concepts`, update `last_demo_path`
-3. Update `memory/`: Write "Mastered <concept list>"
+2. Update `state.json`:
+   - `current_day++`, update `last_demo_path`
+   - Append concepts **taught this lesson** → `completed_concepts`
+   - Append concepts the user **skipped/marked known** this lesson → `known_concepts`
+   - Never double-list a concept in both arrays.
+3. Update `memory/`: record mastery so **other courses** can skip it later. Write
+   the concept names (not just "Day N done") — e.g. "Mastered: hooks, JSX, components
+   (via <tech>, Day N)". Skipped-known concepts count as mastered in memory too.
 4. If `current_day > total_days`, prompt: "Course complete! Run `/learn review` for cheat sheets, or `/learn graph <tech>` to explore the knowledge map."
 
 ---
@@ -267,7 +309,8 @@ Total: 3 courses · 1 active · 1 completed
 Rules:
 - Build the bar from real numbers: filled = round(current_day-1 / total_days * 12), so "Day 4/7" shows 3 full days done.
 - If `current_day > total_days`, mark ✅ completed and suggest `/learn review <tech>`.
-- Read `completed_concepts` from state.json for the "Mastered" line (truncate to ~5, "+N more").
+- "Mastered" line = `completed_concepts` (taught) + `known_concepts` (skipped, tag them
+  as "known" e.g. "routing, RSC, hooks (known)"). Truncate to ~5, "+N more".
 - If `.active` names a course whose folder is missing, warn and list what does exist.
 - Keep it compact. No walls of text.
 
@@ -358,3 +401,4 @@ Examples:
 4. **Progress visible**: Show current progress bar at the start of each continue
 5. **Memory bidirectional sync**: state.json and memory/ (both under DATA_ROOT) updated simultaneously after each lesson
 6. **Teaching iron rule**: Explain → Visualize → Build → Verify. NEVER skip to code.
+7. **Don't re-teach what's known**: before every lesson, `mastered = completed_concepts ∪ known_concepts` (this course) plus concepts mastered in other courses (from memory). Compress or skip those — but always name what's skipped so the user can veto.
